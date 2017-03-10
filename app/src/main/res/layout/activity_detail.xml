@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:id="@+id/main_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include android:id="@+id/toolbar"
+        layout="@layout/component_toolbar" />
+
+    <TextView
+        android:id="@+id/symbol_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Symbol" />
+
+    <TextView
+        android:id="@+id/price_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Symbol" />
+
+    <TextView
+        android:id="@+id/abs_change_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Symbol" />
+
+    <TextView
+        android:id="@+id/percent_change_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Symbol" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/history_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
