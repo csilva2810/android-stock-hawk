@@ -23,6 +23,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ui.DetailActivity"
+            android:parentActivityName=".ui.MainActivity" />
+
         <service
             android:name=".sync.QuoteIntentService"
             android:exported="false" />
@@ -38,7 +41,6 @@
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <activity android:name=".ui.DetailActivity"></activity>
     </application>
 
 </manifest>

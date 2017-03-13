@@ -36,5 +36,7 @@
     <string name="message_symbol_not_found">Symbol %1$s not found.</string>
 
     <string name="message_update_success">Update With Success</string>
+    <string name="tab_chart_content_description">Chart Visualization</string>
+    <string name="tab_list_content_description">List Visualization</string>
 
 </resources>
