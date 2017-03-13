@@ -2,18 +2,16 @@ package com.udacity.stockhawk.ui;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.test.suitebuilder.annotation.Suppress;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.udacity.stockhawk.R;
-import com.udacity.stockhawk.model.MyStock;
+import com.udacity.stockhawk.utils.DateUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,9 +23,9 @@ import butterknife.ButterKnife;
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder> {
 
     private Context context;
-    private HashMap<String, Float> historyList;
+    private ArrayList<String[]> historyList;
 
-    public HistoryAdapter(Context context, HashMap historyList) {
+    public HistoryAdapter(Context context, ArrayList<String[]> historyList) {
         this.context = context;
         this.historyList = historyList;
     }
@@ -58,7 +56,13 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
     @Override
     public void onBindViewHolder(HistoryViewHolder holder, int position) {
 
+        String[] histDetail = historyList.get(position);
 
+        String date = DateUtils.getDisplayDate(Long.valueOf(histDetail[0]));
+        float datePrice = Float.parseFloat(histDetail[1]);
+
+        holder.tvDate.setText(date);
+        holder.tvPrice.setText(String.valueOf(datePrice));
 
     }
 
@@ -69,7 +73,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
 
     @Override
     public int getItemCount() {
-        return 0;
+        return historyList.size();
     }
 
 }

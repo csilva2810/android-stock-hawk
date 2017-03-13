@@ -1,5 +1,6 @@
 package com.udacity.stockhawk.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
@@ -13,10 +14,10 @@ public class MyStock {
     private float price;
     private float absoluteChange;
     private float percentageChange;
-    private HashMap<String, Float> history;
+    private ArrayList<String[]> history;
     private String name;
 
-    public MyStock(float price, float absoluteChange, float percentageChange, HashMap history, String name) {
+    public MyStock(float price, float absoluteChange, float percentageChange, ArrayList<String[]> history, String name) {
         this.price = price;
         this.absoluteChange = absoluteChange;
         this.percentageChange = percentageChange;
@@ -48,11 +49,11 @@ public class MyStock {
         this.percentageChange = percentageChange;
     }
 
-    public HashMap<String, Float> getHistory() {
+    public ArrayList<String[]> getHistory() {
         return history;
     }
 
-    public void setHistory(HashMap history) {
+    public void setHistory(ArrayList<String[]> history) {
         this.history = history;
     }
 

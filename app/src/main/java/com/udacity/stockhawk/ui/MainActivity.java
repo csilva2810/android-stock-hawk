@@ -10,6 +10,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,22 +28,27 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
+public class MainActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>,
         SwipeRefreshLayout.OnRefreshListener,
         StockAdapter.StockAdapterOnClickHandler {
 
     public static final String EXTRA_SYMBOL = "EXTRA_SYMBOL";
 
     private static final int STOCK_LOADER = 0;
-    @SuppressWarnings("WeakerAccess")
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
     @BindView(R.id.recycler_view)
     RecyclerView stockRecyclerView;
-    @SuppressWarnings("WeakerAccess")
+
     @BindView(R.id.swipe_refresh)
     SwipeRefreshLayout swipeRefreshLayout;
-    @SuppressWarnings("WeakerAccess")
+
     @BindView(R.id.error)
     TextView error;
+
     private StockAdapter adapter;
 
     @Override
@@ -53,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         detailIntent.putExtra(EXTRA_SYMBOL, symbol);
 
         startActivity(detailIntent);
-
     }
 
     @Override
@@ -62,6 +67,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        toolbar.setElevation(12);
+        setSupportActionBar(toolbar);
 
         adapter = new StockAdapter(this, this);
         stockRecyclerView.setAdapter(adapter);
@@ -87,7 +95,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
             }
         }).attachToRecyclerView(stockRecyclerView);
-
 
     }
 
