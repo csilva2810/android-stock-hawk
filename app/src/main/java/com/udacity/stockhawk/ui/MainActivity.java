@@ -8,6 +8,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -37,27 +38,18 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final int STOCK_LOADER = 0;
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-
-    @BindView(R.id.recycler_view)
-    RecyclerView stockRecyclerView;
-
-    @BindView(R.id.swipe_refresh)
-    SwipeRefreshLayout swipeRefreshLayout;
-
-    @BindView(R.id.error)
-    TextView error;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.recycler_view) RecyclerView stockRecyclerView;
+    @BindView(R.id.swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.error) TextView error;
 
     private StockAdapter adapter;
 
     @Override
     public void onClick(String symbol) {
-        Timber.d("Symbol clicked: %s", symbol);
 
         Intent detailIntent = new Intent(this, DetailActivity.class);
         detailIntent.putExtra(EXTRA_SYMBOL, symbol);
-
         startActivity(detailIntent);
     }
 
@@ -73,7 +65,10 @@ public class MainActivity extends AppCompatActivity implements
 
         adapter = new StockAdapter(this, this);
         stockRecyclerView.setAdapter(adapter);
-        stockRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        stockRecyclerView.setLayoutManager(layoutManager);
+        stockRecyclerView.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation()));
 
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setRefreshing(true);

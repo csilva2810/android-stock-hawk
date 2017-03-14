@@ -96,7 +96,12 @@ public final class QuoteSyncJob {
                         historyBuilder.append(it.getDate().getTimeInMillis());
                         historyBuilder.append(", ");
                         historyBuilder.append(it.getClose());
+                        historyBuilder.append(", ");
+                        historyBuilder.append(it.getLow());
+                        historyBuilder.append(", ");
+                        historyBuilder.append(it.getHigh());
                         historyBuilder.append("\n");
+                        Timber.d("History Quote: " + historyBuilder.toString());
                     }
 
                     ContentValues quoteCV = new ContentValues();

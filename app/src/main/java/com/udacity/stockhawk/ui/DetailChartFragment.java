@@ -93,9 +93,9 @@ public class DetailChartFragment extends Fragment {
         data.setAxisYLeft(axisY);
 
         chartView.setInteractive(true);
+        chartView.setNestedScrollingEnabled(true);
         chartView.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
         chartView.setLineChartData(data);
-        chartView.setNestedScrollingEnabled(true);
 
         return view;
 
