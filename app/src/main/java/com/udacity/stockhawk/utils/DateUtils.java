@@ -3,8 +3,12 @@ package com.udacity.stockhawk.utils;
 import android.util.Log;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+
+import timber.log.Timber;
 
 /**
  * Created by carlinhos on 1/17/17.
@@ -39,6 +43,27 @@ public class DateUtils {
             return df.format(date);
         } catch (Exception e) {
             Log.d(LOG_TAG, e.getMessage());
+            return "";
+        }
+    }
+
+    /**
+     *
+     * @param millis
+     * @return String - date formated to charts labels (fev, 03)
+     */
+    public static String getChartLabelDate(Long millis) {
+        try {
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(millis);
+            Date date = calendar.getTime();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM, dd");
+            return sdf.format(date);
+
+        } catch (Exception e) {
+            Timber.d(e.getMessage());
             return "";
         }
     }

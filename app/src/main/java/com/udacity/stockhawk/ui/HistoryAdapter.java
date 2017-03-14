@@ -8,35 +8,28 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.model.History;
 import com.udacity.stockhawk.utils.DateUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Created by carlinhos on 3/10/17.
- */
-
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder> {
 
     private Context context;
-    private ArrayList<String[]> historyList;
+    private ArrayList<History> historyList;
 
-    public HistoryAdapter(Context context, ArrayList<String[]> historyList) {
+    public HistoryAdapter(Context context, ArrayList<History> historyList) {
         this.context = context;
         this.historyList = historyList;
     }
 
     class HistoryViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.date_textview)
-        TextView tvDate;
-
-        @BindView(R.id.price_textview)
-        TextView tvPrice;
+        @BindView(R.id.date_textview) TextView tvDate;
+        @BindView(R.id.price_textview) TextView tvPrice;
 
         HistoryViewHolder(View itemView) {
             super(itemView);
@@ -56,13 +49,10 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
     @Override
     public void onBindViewHolder(HistoryViewHolder holder, int position) {
 
-        String[] histDetail = historyList.get(position);
+        History history = historyList.get(position);
 
-        String date = DateUtils.getDisplayDate(Long.valueOf(histDetail[0]));
-        float datePrice = Float.parseFloat(histDetail[1]);
-
-        holder.tvDate.setText(date);
-        holder.tvPrice.setText(String.valueOf(datePrice));
+        holder.tvDate.setText(DateUtils.getDisplayDate(Long.valueOf(history.getDate())));
+        holder.tvPrice.setText(String.valueOf(history.getPrice()));
 
     }
 

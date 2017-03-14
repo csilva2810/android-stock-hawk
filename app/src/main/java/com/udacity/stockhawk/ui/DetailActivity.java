@@ -1,61 +1,44 @@
 package com.udacity.stockhawk.ui;
 
-import android.content.Intent;
 import android.database.Cursor;
-
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
-import com.udacity.stockhawk.model.MyStock;
+import com.udacity.stockhawk.model.History;
+import com.udacity.stockhawk.model.Stock;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity {
 
-    private MyStock stock;
+    private Stock stock;
     private DecimalFormat moneyFormat, percentFormat, moneyFormatWithPlus;
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-
-    @BindView(R.id.toolbar_title)
-    TextView toolbarTitle;
-
-    @BindView(R.id.tab_layout)
-    TabLayout tabLayout;
-
-    @BindView(R.id.symbol_textview)
-    TextView tvSymbol;
-
-    @BindView(R.id.price_textview)
-    TextView tvPrice;
-
-    @BindView(R.id.abs_change_textview)
-    TextView tvAbsChange;
-
-    @BindView(R.id.percent_change_textview)
-    TextView tvPercentChange;
-
-    //@BindView(R.id.history_recyclerview)
-    // RecyclerView rvHistory;
-
-    @BindView(R.id.detail_viewpager)
-    ViewPager vpDetail;
+    @BindView(R.id.toolbar                ) Toolbar toolbar;
+    @BindView(R.id.toolbar_title          ) TextView toolbarTitle;
+    @BindView(R.id.tab_layout             ) TabLayout tabLayout;
+    @BindView(R.id.symbol_textview        ) TextView tvSymbol;
+    @BindView(R.id.price_textview         ) TextView tvPrice;
+    @BindView(R.id.abs_change_textview    ) TextView tvAbsChange;
+    @BindView(R.id.percent_change_textview) TextView tvPercentChange;
+    @BindView(R.id.detail_viewpager       ) ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,13 +47,24 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
-        initFormatters();
-        initTabs();
-
-        Intent extras = getIntent();
-        String symbol = extras.getStringExtra(MainActivity.EXTRA_SYMBOL);
-
+        String symbol = getIntent().getStringExtra(MainActivity.EXTRA_SYMBOL);
         stock = getStockForSymbol(symbol);
+
+        setupToolbar();
+        initFormatters();
+        setupViewPager();
+
+        tabLayout.setupWithViewPager(viewPager);
+        // initTabs();
+
+        tvSymbol.setText(symbol);
+        tvPrice.setText( moneyFormat.format(stock.getPrice()) );
+        tvAbsChange.setText( moneyFormatWithPlus.format(stock.getAbsoluteChange()) );
+        tvPercentChange.setText( percentFormat.format(stock.getPercentageChange()) );
+
+    }
+
+    protected void setupToolbar() {
 
         toolbar.setElevation(0);
         toolbarTitle.setText(stock.getName());
@@ -78,28 +72,70 @@ public class DetailActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
-        tvSymbol.setText(symbol);
-        tvPrice.setText( moneyFormat.format(stock.getPrice()) );
-        tvAbsChange.setText( moneyFormatWithPlus.format(stock.getAbsoluteChange()) );
-        tvPercentChange.setText( percentFormat.format(stock.getPercentageChange()) );
+    protected void setupViewPager() {
 
-        // rvHistory.setLayoutManager(new LinearLayoutManager(this));
-        // rvHistory.setNestedScrollingEnabled(false);
-        // rvHistory.setAdapter(new HistoryAdapter(this, stock.getHistory()));
+
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(DetailListFragment.ARG_HISTORY_LIST, stock.getHistory());
+
+        Fragment detailListFragment = new DetailListFragment();
+        detailListFragment.setArguments(bundle);
+
+        Fragment detailChartFragment = new DetailChartFragment();
+        detailChartFragment.setArguments(bundle);
+
+        Adapter adapter = new Adapter(getSupportFragmentManager());
+        adapter.addFragment(detailChartFragment, "Chart");
+        adapter.addFragment(detailListFragment, "List");
+
+        viewPager.setAdapter(adapter);
 
     }
 
-    protected void initTabs() {
+//    protected void initTabs() {
+//
+//        TabLayout.Tab tabList = tabLayout.newTab();
+//        TabLayout.Tab tabChart = tabLayout.newTab();
+//
+//        tabList.setIcon(R.drawable.tab_view_list_white).setContentDescription(R.string.tab_list_content_description);
+//        tabChart.setIcon(R.drawable.tab_timeline_white).setContentDescription(R.string.tab_chart_content_description);
+//
+//        tabLayout.addTab(tabList);
+//        tabLayout.addTab(tabChart);
+//
+//    }
 
-        TabLayout.Tab tabChart = tabLayout.newTab();
-        TabLayout.Tab tabList = tabLayout.newTab();
+    static class Adapter extends FragmentPagerAdapter {
 
-        tabChart.setIcon(R.drawable.tab_timeline_white).setContentDescription(R.string.tab_chart_content_description);
-        tabList.setIcon(R.drawable.tab_view_list_white).setContentDescription(R.string.tab_list_content_description);
+        private final List<Fragment> fragmentList = new ArrayList<>();
+        private final List<String> titleList = new ArrayList<>();
 
-        tabLayout.addTab(tabChart);
-        tabLayout.addTab(tabList);
+        public Adapter(FragmentManager manager) {
+            super(manager);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return fragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return fragmentList.size();
+        }
+
+        public void addFragment(Fragment fragment, String title) {
+            fragmentList.add(fragment);
+            titleList.add(title);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return titleList.get(position);
+        }
 
     }
 
@@ -121,7 +157,7 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    protected MyStock getStockForSymbol(String symbol) {
+    protected Stock getStockForSymbol(String symbol) {
 
         String[] columns = new String[] {
                 Contract.Quote._ID,
@@ -143,7 +179,7 @@ public class DetailActivity extends AppCompatActivity {
             return null;
         }
 
-        ArrayList<String[]> historyList = new ArrayList<>();
+        ArrayList<History> historyList = new ArrayList<>();
         HashMap<String, Float> historyMap = new HashMap<>();
 
         float price = Float.parseFloat(c.getString(Contract.Quote.POSITION_PRICE));
@@ -157,23 +193,15 @@ public class DetailActivity extends AppCompatActivity {
         for (String h : historyArray) {
 
             String[] histDetail = h.split(",");
-            historyList.add(histDetail);
 
+            String date = histDetail[0];
+            float datePrice = Float.valueOf(histDetail[1]);
 
-//                Calendar calendar = Calendar.getInstance();
-//                calendar.setTimeInMillis(Long.valueOf(date));
-//
-//                Timber.d(
-//                    "Date: " +
-//                    calendar.get(Calendar.DAY_OF_MONTH) + "/" +
-//                    calendar.get(Calendar.MONTH) + "/" +
-//                    calendar.get(Calendar.YEAR) +
-//                    " Value: " + datePrice
-//                );
+            historyList.add(new History(date, datePrice));
 
         }
 
-        return new MyStock(price, absoluteChange, percentageChange, historyList, name);
+        return new Stock(price, absoluteChange, percentageChange, historyList, name);
 
     }
 
