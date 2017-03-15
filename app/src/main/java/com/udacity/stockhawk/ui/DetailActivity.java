@@ -2,12 +2,13 @@ package com.udacity.stockhawk.ui;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
@@ -31,6 +32,7 @@ public class DetailActivity extends AppCompatActivity {
     private Stock stock;
     private DecimalFormat moneyFormat, percentFormat, moneyFormatWithPlus;
 
+    @BindView(R.id.collapsing_toolbar     ) CollapsingToolbarLayout collapsingToolbar;
     @BindView(R.id.toolbar                ) Toolbar toolbar;
     @BindView(R.id.toolbar_title          ) TextView toolbarTitle;
     @BindView(R.id.tab_layout             ) TabLayout tabLayout;
@@ -39,6 +41,7 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.abs_change_textview    ) TextView tvAbsChange;
     @BindView(R.id.percent_change_textview) TextView tvPercentChange;
     @BindView(R.id.detail_viewpager       ) ViewPager viewPager;
+    @BindView(R.id.nested_scrollview      ) NestedScrollView scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +58,7 @@ public class DetailActivity extends AppCompatActivity {
         setupViewPager();
 
         tabLayout.setupWithViewPager(viewPager);
-        // initTabs();
+        scrollView.setFillViewport(true);
 
         tvSymbol.setText(symbol);
         tvPrice.setText( moneyFormat.format(stock.getPrice()) );
@@ -67,16 +70,16 @@ public class DetailActivity extends AppCompatActivity {
     protected void setupToolbar() {
 
         toolbar.setElevation(0);
+        collapsingToolbar.setTitle(stock.getName());
         toolbarTitle.setText(stock.getName());
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
 
     protected void setupViewPager() {
-
-
 
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(DetailListFragment.ARG_HISTORY_LIST, stock.getHistory());
@@ -88,8 +91,8 @@ public class DetailActivity extends AppCompatActivity {
         detailChartFragment.setArguments(bundle);
 
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(detailChartFragment, "Chart");
-        adapter.addFragment(detailListFragment, "List");
+        adapter.addFragment(detailChartFragment, getString(R.string.chart_tab_title));
+        adapter.addFragment(detailListFragment, getString(R.string.list_tab_title));
 
         viewPager.setAdapter(adapter);
 

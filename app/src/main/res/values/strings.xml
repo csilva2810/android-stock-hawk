@@ -41,5 +41,9 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="chart_date_label">Date</string>
+    <string name="chart_price_label">Price</string>
+    <string name="chart_tab_title">Chart</string>
+    <string name="list_tab_title">List</string>
 
 </resources>

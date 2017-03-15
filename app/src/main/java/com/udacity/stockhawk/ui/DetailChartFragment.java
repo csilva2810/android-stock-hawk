@@ -29,6 +29,7 @@ import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.view.LineChartView;
+import timber.log.Timber;
 
 public class DetailChartFragment extends Fragment {
 
@@ -75,22 +76,29 @@ public class DetailChartFragment extends Fragment {
 
         // In most cased you can call data model methods in builder-pattern-like manner.
         Line line = new Line(values);
-        line.setColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+        line.setColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+        line.setFilled(true);
+        line.setHasLabels(true);
+
         List<Line> lines = new ArrayList<>();
         lines.add(line);
 
         LineChartData data = new LineChartData();
         data.setLines(lines);
 
+        int labelColor = ContextCompat.getColor(getActivity(), R.color.chartLabelColor);
+
         Axis axisX = new Axis(axisXValues);
-        axisX.setTextColor(Color.BLACK);
-        axisX.setName("Date");
-        data.setAxisXBottom(axisX);
+        axisX.setTextColor(labelColor);
+        axisX.setName(getString(R.string.chart_date_label));
 
         Axis axisY = new Axis(axisYValues);
-        axisY.setTextColor(Color.BLACK);
-        axisY.setName("Price");
+        axisY.setTextColor(labelColor);
+        axisY.setName(getString(R.string.chart_price_label));
+
+        data.setAxisXBottom(axisX);
         data.setAxisYLeft(axisY);
+        data.setBaseValue(Float.NEGATIVE_INFINITY);
 
         chartView.setInteractive(true);
         chartView.setNestedScrollingEnabled(true);

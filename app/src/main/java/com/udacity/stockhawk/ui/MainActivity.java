@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         stockRecyclerView.setLayoutManager(layoutManager);
-        stockRecyclerView.addItemDecoration(new DividerItemDecoration(this, layoutManager.getOrientation()));
 
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setRefreshing(true);
