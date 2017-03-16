@@ -17,6 +17,7 @@ import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.model.History;
 import com.udacity.stockhawk.model.Stock;
+import com.udacity.stockhawk.utils.NumberUtils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -30,7 +31,6 @@ import butterknife.ButterKnife;
 public class DetailActivity extends AppCompatActivity {
 
     private Stock stock;
-    private DecimalFormat moneyFormat, percentFormat, moneyFormatWithPlus;
 
     @BindView(R.id.collapsing_toolbar     ) CollapsingToolbarLayout collapsingToolbar;
     @BindView(R.id.toolbar                ) Toolbar toolbar;
@@ -54,16 +54,17 @@ public class DetailActivity extends AppCompatActivity {
         stock = getStockForSymbol(symbol);
 
         setupToolbar();
-        initFormatters();
         setupViewPager();
 
         tabLayout.setupWithViewPager(viewPager);
         scrollView.setFillViewport(true);
+        scrollView.setNestedScrollingEnabled(true);
+        scrollView.setSmoothScrollingEnabled(true);
 
         tvSymbol.setText(symbol);
-        tvPrice.setText( moneyFormat.format(stock.getPrice()) );
-        tvAbsChange.setText( moneyFormatWithPlus.format(stock.getAbsoluteChange()) );
-        tvPercentChange.setText( percentFormat.format(stock.getPercentageChange()) );
+        tvPrice.setText(NumberUtils.formatMoney(stock.getPrice()));
+        tvAbsChange.setText( NumberUtils.formatMoneyWithPlus(stock.getAbsoluteChange()) );
+        tvPercentChange.setText( NumberUtils.formatPercent(stock.getPercentageChange()) );
 
     }
 
@@ -142,24 +143,6 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    protected void initFormatters() {
-
-        moneyFormat = (DecimalFormat) NumberFormat.getCurrencyInstance();
-
-        moneyFormatWithPlus = (DecimalFormat) NumberFormat.getCurrencyInstance();
-        moneyFormatWithPlus.setMaximumFractionDigits(2);
-        moneyFormatWithPlus.setMinimumFractionDigits(2);
-        moneyFormatWithPlus.setNegativePrefix("$-");
-        moneyFormatWithPlus.setPositivePrefix("$");
-
-        percentFormat = (DecimalFormat) NumberFormat.getCurrencyInstance();
-        percentFormat.setMaximumFractionDigits(2);
-        percentFormat.setMinimumFractionDigits(2);
-        percentFormat.setNegativePrefix("%-");
-        percentFormat.setPositivePrefix("%");
-
-    }
-
     protected Stock getStockForSymbol(String symbol) {
 
         String[] columns = new String[] {
@@ -199,8 +182,10 @@ public class DetailActivity extends AppCompatActivity {
 
             String date = histDetail[0];
             float datePrice = Float.valueOf(histDetail[1]);
+            float low = Float.valueOf(histDetail[2]);
+            float high = Float.valueOf(histDetail[3]);
 
-            historyList.add(new History(date, datePrice));
+            historyList.add(new History(date, datePrice, low, high));
 
         }
 

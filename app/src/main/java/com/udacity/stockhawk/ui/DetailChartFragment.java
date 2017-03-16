@@ -58,6 +58,7 @@ public class DetailChartFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_detail_chart, container, false);
         ButterKnife.bind(this, view);
 
+        int labelColor = ContextCompat.getColor(getActivity(), R.color.chartLabelColor);
         List<PointValue> values = new ArrayList<>();
         List<AxisValue> axisXValues = new ArrayList<>();
         List<AxisValue> axisYValues = new ArrayList<>();
@@ -74,19 +75,16 @@ public class DetailChartFragment extends Fragment {
 
         }
 
-        // In most cased you can call data model methods in builder-pattern-like manner.
         Line line = new Line(values);
         line.setColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
         line.setFilled(true);
-        line.setHasLabels(true);
+        line.setHasLabelsOnlyForSelected(true);
 
         List<Line> lines = new ArrayList<>();
         lines.add(line);
 
         LineChartData data = new LineChartData();
         data.setLines(lines);
-
-        int labelColor = ContextCompat.getColor(getActivity(), R.color.chartLabelColor);
 
         Axis axisX = new Axis(axisXValues);
         axisX.setTextColor(labelColor);

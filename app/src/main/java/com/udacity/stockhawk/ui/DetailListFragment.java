@@ -43,7 +43,7 @@ public class DetailListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_detail_list, container, false);
         ButterKnife.bind(this, view);
 
-        rvHistory.setNestedScrollingEnabled(false);
+        rvHistory.setNestedScrollingEnabled(true);
         rvHistory.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         rvHistory.setAdapter(new HistoryAdapter(view.getContext(), historyList));
 

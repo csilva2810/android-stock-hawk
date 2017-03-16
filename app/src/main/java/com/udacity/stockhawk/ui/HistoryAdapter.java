@@ -10,11 +10,13 @@ import android.widget.TextView;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.model.History;
 import com.udacity.stockhawk.utils.DateUtils;
+import com.udacity.stockhawk.utils.NumberUtils;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder> {
 
@@ -52,7 +54,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
         History history = historyList.get(position);
 
         holder.tvDate.setText(DateUtils.getDisplayDate(Long.valueOf(history.getDate())));
-        holder.tvPrice.setText(String.valueOf(history.getPrice()));
+        holder.tvPrice.setText(NumberUtils.formatMoney(history.getPrice()));
 
     }
 

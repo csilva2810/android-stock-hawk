@@ -45,5 +45,6 @@
     <string name="chart_price_label">Price</string>
     <string name="chart_tab_title">Chart</string>
     <string name="list_tab_title">List</string>
+    <string name="add_new_stock">Add New Stock</string>
 
 </resources>
