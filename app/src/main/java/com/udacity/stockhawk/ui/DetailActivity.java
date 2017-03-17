@@ -71,7 +71,7 @@ public class DetailActivity extends AppCompatActivity {
     protected void setupToolbar() {
 
         toolbar.setElevation(0);
-        collapsingToolbar.setTitle(stock.getName());
+//        collapsingToolbar.setTitle(stock.getName());
         toolbarTitle.setText(stock.getName());
         setSupportActionBar(toolbar);
 
