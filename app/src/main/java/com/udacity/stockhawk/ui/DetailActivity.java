@@ -61,18 +61,29 @@ public class DetailActivity extends AppCompatActivity {
         scrollView.setNestedScrollingEnabled(true);
         scrollView.setSmoothScrollingEnabled(true);
 
+        String price = NumberUtils.formatMoney(stock.getPrice());
+        String absChange = NumberUtils.formatMoneyWithPlus(stock.getAbsoluteChange());
+        String percentChange = NumberUtils.formatPercent(stock.getPercentageChange());
+
         tvSymbol.setText(symbol);
-        tvPrice.setText(NumberUtils.formatMoney(stock.getPrice()));
-        tvAbsChange.setText( NumberUtils.formatMoneyWithPlus(stock.getAbsoluteChange()) );
-        tvPercentChange.setText( NumberUtils.formatPercent(stock.getPercentageChange()) );
+        tvPrice.setText(price);
+        tvAbsChange.setText(absChange);
+        tvPercentChange.setText(percentChange);
+
+        tvSymbol.setContentDescription(getString(R.string.a11y_symbol, symbol));
+        tvPrice.setContentDescription(getString(R.string.a11y_stock_price, price));
+        tvAbsChange.setContentDescription(getString(R.string.a11y_stock_change, absChange));
+        tvPercentChange.setContentDescription(getString(R.string.a11y_stock_change, percentChange));
 
     }
 
     protected void setupToolbar() {
 
+
         toolbar.setElevation(0);
-//        collapsingToolbar.setTitle(stock.getName());
+//        collapsingToolbar.setTitle(etStockSymbol.getName());
         toolbarTitle.setText(stock.getName());
+        toolbarTitle.setContentDescription(getString(R.string.a11y_detail_title, stock.getName()));
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);

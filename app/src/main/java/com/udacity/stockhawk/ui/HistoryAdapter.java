@@ -53,8 +53,14 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
 
         History history = historyList.get(position);
 
-        holder.tvDate.setText(DateUtils.getDisplayDate(Long.valueOf(history.getDate())));
-        holder.tvPrice.setText(NumberUtils.formatMoney(history.getPrice()));
+        String date = DateUtils.getDisplayDate(Long.valueOf(history.getDate()));
+        String price = NumberUtils.formatMoney(history.getPrice());
+
+        holder.tvDate.setText(date);
+        holder.tvPrice.setText(price);
+
+        holder.tvDate.setContentDescription(context.getString(R.string.a11y_stock_date, date));
+        holder.tvPrice.setContentDescription(context.getString(R.string.a11y_stock_price, price));
 
     }
 

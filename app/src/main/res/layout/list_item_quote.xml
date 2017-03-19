@@ -6,7 +6,9 @@
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:layout_centerVertical="true"
     android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingStart="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingEnd="@dimen/activity_horizontal_margin"
     android:clickable="true"
     android:background="?attr/selectableItemBackground">
 
@@ -16,6 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/symbol_margin"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         tools:text="GOOG" />
 
@@ -30,6 +33,7 @@
         style="@style/PercentChangeTextStyle"
         android:id="@+id/change"
         android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -42,9 +46,11 @@
         android:id="@+id/price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/change"
         android:layout_toStartOf="@id/change"
         android:layout_centerVertical="true"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
         tools:text="1000.00" />
 
 </RelativeLayout>

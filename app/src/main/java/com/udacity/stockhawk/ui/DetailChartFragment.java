@@ -78,7 +78,7 @@ public class DetailChartFragment extends Fragment {
         Line line = new Line(values);
         line.setColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
         line.setFilled(true);
-        line.setHasLabelsOnlyForSelected(true);
+        line.setHasLabels(true);
 
         List<Line> lines = new ArrayList<>();
         lines.add(line);
