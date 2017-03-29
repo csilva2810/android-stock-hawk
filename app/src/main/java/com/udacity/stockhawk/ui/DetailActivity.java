@@ -1,6 +1,5 @@
 package com.udacity.stockhawk.ui;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
@@ -14,15 +13,10 @@ import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.udacity.stockhawk.R;
-import com.udacity.stockhawk.data.Contract;
-import com.udacity.stockhawk.model.History;
 import com.udacity.stockhawk.model.Stock;
 import com.udacity.stockhawk.utils.NumberUtils;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
@@ -30,18 +24,18 @@ import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity {
 
-    private Stock stock;
+    private Stock mStock;
 
-    @BindView(R.id.collapsing_toolbar     ) CollapsingToolbarLayout collapsingToolbar;
-    @BindView(R.id.toolbar                ) Toolbar toolbar;
-    @BindView(R.id.toolbar_title          ) TextView toolbarTitle;
-    @BindView(R.id.tab_layout             ) TabLayout tabLayout;
-    @BindView(R.id.symbol_textview        ) TextView tvSymbol;
-    @BindView(R.id.price_textview         ) TextView tvPrice;
-    @BindView(R.id.abs_change_textview    ) TextView tvAbsChange;
-    @BindView(R.id.percent_change_textview) TextView tvPercentChange;
-    @BindView(R.id.detail_viewpager       ) ViewPager viewPager;
-    @BindView(R.id.nested_scrollview      ) NestedScrollView scrollView;
+    @BindView(R.id.collapsing_toolbar     ) CollapsingToolbarLayout mCollapsingToolbar;
+    @BindView(R.id.toolbar                ) Toolbar mToolbar;
+    @BindView(R.id.toolbar_title          ) TextView mToolbarTitle;
+    @BindView(R.id.tab_layout             ) TabLayout mTabLayout;
+    @BindView(R.id.symbol_textview        ) TextView mTvSymbol;
+    @BindView(R.id.price_textview         ) TextView mTvPrice;
+    @BindView(R.id.abs_change_textview    ) TextView mTvAbsChange;
+    @BindView(R.id.percent_change_textview) TextView mTvPercentChange;
+    @BindView(R.id.detail_viewpager       ) ViewPager mViewPager;
+    @BindView(R.id.nested_scrollview      ) NestedScrollView mScrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,40 +45,39 @@ public class DetailActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         String symbol = getIntent().getStringExtra(MainActivity.EXTRA_SYMBOL);
-        stock = getStockForSymbol(symbol);
+        mStock = Stock.getStockForSymbol(DetailActivity.this, symbol);
 
         setupToolbar();
         setupViewPager();
 
-        tabLayout.setupWithViewPager(viewPager);
-        scrollView.setFillViewport(true);
-        scrollView.setNestedScrollingEnabled(true);
-        scrollView.setSmoothScrollingEnabled(true);
+        mTabLayout.setupWithViewPager(mViewPager);
+        mScrollView.setFillViewport(true);
+        mScrollView.setNestedScrollingEnabled(true);
+        mScrollView.setSmoothScrollingEnabled(true);
 
-        String price = NumberUtils.formatMoney(stock.getPrice());
-        String absChange = NumberUtils.formatMoneyWithPlus(stock.getAbsoluteChange());
-        String percentChange = NumberUtils.formatPercent(stock.getPercentageChange());
+        String price = NumberUtils.formatMoney(mStock.getmPrice());
+        String absChange = NumberUtils.formatMoneyWithPlus(mStock.getmAbsoluteChange());
+        String percentChange = NumberUtils.formatPercent(mStock.getmPercentageChange());
 
-        tvSymbol.setText(symbol);
-        tvPrice.setText(price);
-        tvAbsChange.setText(absChange);
-        tvPercentChange.setText(percentChange);
+        mTvSymbol.setText(symbol);
+        mTvPrice.setText(price);
+        mTvAbsChange.setText(absChange);
+        mTvPercentChange.setText(percentChange);
 
-        tvSymbol.setContentDescription(getString(R.string.a11y_symbol, symbol));
-        tvPrice.setContentDescription(getString(R.string.a11y_stock_price, price));
-        tvAbsChange.setContentDescription(getString(R.string.a11y_stock_change, absChange));
-        tvPercentChange.setContentDescription(getString(R.string.a11y_stock_change, percentChange));
+        mTvSymbol.setContentDescription(getString(R.string.a11y_symbol, symbol));
+        mTvPrice.setContentDescription(getString(R.string.a11y_stock_price, price));
+        mTvAbsChange.setContentDescription(getString(R.string.a11y_stock_change, absChange));
+        mTvPercentChange.setContentDescription(getString(R.string.a11y_stock_change, percentChange));
 
     }
 
     protected void setupToolbar() {
 
 
-        toolbar.setElevation(0);
-//        collapsingToolbar.setTitle(etStockSymbol.getName());
-        toolbarTitle.setText(stock.getName());
-        toolbarTitle.setContentDescription(getString(R.string.a11y_detail_title, stock.getName()));
-        setSupportActionBar(toolbar);
+        mToolbar.setElevation(0);
+        mToolbarTitle.setText(mStock.getmName());
+        mToolbarTitle.setContentDescription(getString(R.string.a11y_detail_title, mStock.getmName()));
+        setSupportActionBar(mToolbar);
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -94,7 +87,7 @@ public class DetailActivity extends AppCompatActivity {
     protected void setupViewPager() {
 
         Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList(DetailListFragment.ARG_HISTORY_LIST, stock.getHistory());
+        bundle.putParcelableArrayList(DetailListFragment.ARG_HISTORY_LIST, mStock.getmHistory());
 
         Fragment detailListFragment = new DetailListFragment();
         detailListFragment.setArguments(bundle);
@@ -106,22 +99,9 @@ public class DetailActivity extends AppCompatActivity {
         adapter.addFragment(detailChartFragment, getString(R.string.chart_tab_title));
         adapter.addFragment(detailListFragment, getString(R.string.list_tab_title));
 
-        viewPager.setAdapter(adapter);
+        mViewPager.setAdapter(adapter);
 
     }
-
-//    protected void initTabs() {
-//
-//        TabLayout.Tab tabList = tabLayout.newTab();
-//        TabLayout.Tab tabChart = tabLayout.newTab();
-//
-//        tabList.setIcon(R.drawable.tab_view_list_white).setContentDescription(R.string.tab_list_content_description);
-//        tabChart.setIcon(R.drawable.tab_timeline_white).setContentDescription(R.string.tab_chart_content_description);
-//
-//        tabLayout.addTab(tabList);
-//        tabLayout.addTab(tabChart);
-//
-//    }
 
     static class Adapter extends FragmentPagerAdapter {
 
@@ -151,56 +131,6 @@ public class DetailActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return titleList.get(position);
         }
-
-    }
-
-    protected Stock getStockForSymbol(String symbol) {
-
-        String[] columns = new String[] {
-                Contract.Quote._ID,
-                Contract.Quote.COLUMN_SYMBOL,
-                Contract.Quote.COLUMN_PRICE,
-                Contract.Quote.COLUMN_ABSOLUTE_CHANGE,
-                Contract.Quote.COLUMN_PERCENTAGE_CHANGE,
-                Contract.Quote.COLUMN_HISTORY,
-                Contract.Quote.COLUMN_NAME
-        };
-
-        Cursor c = this.getContentResolver().query(
-                Contract.Quote.makeUriForStock(symbol),
-                columns,
-                null, null, null
-        );
-
-        if (c == null || !c.moveToFirst()) {
-            return null;
-        }
-
-        ArrayList<History> historyList = new ArrayList<>();
-        HashMap<String, Float> historyMap = new HashMap<>();
-
-        float price = Float.parseFloat(c.getString(Contract.Quote.POSITION_PRICE));
-        float absoluteChange = Float.parseFloat(c.getString(Contract.Quote.POSITION_ABSOLUTE_CHANGE));
-        float percentageChange = Float.parseFloat(c.getString(Contract.Quote.POSITION_PERCENTAGE_CHANGE));
-        String history = c.getString(Contract.Quote.POSITION_HISTORY);
-        String name = c.getString(Contract.Quote.POSITION_NAME);
-
-        String[] historyArray = history.split("\n");
-
-        for (String h : historyArray) {
-
-            String[] histDetail = h.split(",");
-
-            String date = histDetail[0];
-            float datePrice = Float.valueOf(histDetail[1]);
-            float low = Float.valueOf(histDetail[2]);
-            float high = Float.valueOf(histDetail[3]);
-
-            historyList.add(new History(date, datePrice, low, high));
-
-        }
-
-        return new Stock(price, absoluteChange, percentageChange, historyList, name);
 
     }
 

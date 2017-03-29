@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialKeyguardLayout="@layout/widget_stock"
+    android:initialLayout="@layout/widget_stock"
+    android:minHeight="@dimen/stock_list_widget_minHeight"
+    android:minWidth="@dimen/stock_list_widget_minWidth"
+    android:previewImage="@drawable/stock_hawk_widget"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen|keyguard" />

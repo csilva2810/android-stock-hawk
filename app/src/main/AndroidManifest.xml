@@ -7,6 +7,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.Manifest.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Permissions required by the sync adapter -->
+    <uses-permission
+        android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission
+        android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission
+        android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+
     <application
         android:name=".StockHawkApp"
         android:allowBackup="false"
@@ -15,7 +23,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.MainActivity">
+        <activity
+            android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,23 +32,54 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.DetailActivity"
-            android:parentActivityName=".ui.MainActivity" />
+        <activity
+            android:name=".ui.DetailActivity"
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.udacity.stockhawk.ui.MainActivity" />
+        </activity>
 
         <service
-            android:name=".sync.QuoteIntentService"
-            android:exported="false" />
+            android:name=".widget.WidgetStockService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <service android:name=".account.GenericAccountService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/syncadapter_authenticator_info" />
+        </service>
+
+        <service
+            android:name="com.udacity.stockhawk.sync.QuoteSyncService"
+            android:exported="true"
+            android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter"
+                android:resource="@xml/quote_syncadapter_info" />
+        </service>
 
         <provider
             android:name=".data.StockProvider"
             android:authorities="com.udacity.stockhawk"
-            android:exported="false" />
+            android:exported="false"
+            android:syncable="true" />
 
-        <service
-            android:name=".sync.QuoteJobService"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <receiver
+            android:name=".widget.WidgetStocksProvider"
+            android:label="@string/title_widget_stocks">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.udacity.stockhawk.ACTION_DATA_UPDATED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/stock_list_widget_info" />
+        </receiver>
 
     </application>
 

@@ -1,20 +1,19 @@
 package com.udacity.stockhawk.sync;
 
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
+import android.accounts.Account;
+import android.content.AbstractThreadedSyncAdapter;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.widget.Toast;
+import android.content.SyncResult;
+import android.os.Bundle;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
-import com.udacity.stockhawk.utils.Utility;
+import com.udacity.stockhawk.ui.MainActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,21 +31,34 @@ import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 import yahoofinance.quotes.stock.StockQuote;
 
-public final class QuoteSyncJob {
+/**
+ * Created by carlinhos on 3/26/17.
+ */
 
-    private static final int ONE_OFF_ID = 2;
-    private static final String ACTION_DATA_UPDATED = "com.udacity.stockhawk.ACTION_DATA_UPDATED";
-    private static final int PERIOD = 300000;
-    private static final int INITIAL_BACKOFF = 10000;
-    private static final int PERIODIC_ID = 1;
+public class QuoteSyncAdapter extends AbstractThreadedSyncAdapter {
+
+    public static final String ACTION_DATA_UPDATED = "com.udacity.stockhawk.ACTION_DATA_UPDATED";
+    public static final String ACTION_STOCK_NOT_FOUND = "" +
+            "com.udacity.stockhawk.ACTION_STOCK_NOT_FOUND";
+
     private static final int YEARS_OF_HISTORY = 1;
 
-    private QuoteSyncJob() {
+    private ContentResolver mContentResolver;
+    private Context mContext;
+
+    public QuoteSyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
+        super(context, autoInitialize, allowParallelSyncs);
+
+        mContentResolver = context.getContentResolver();
+        mContext = context;
     }
 
-    static void getQuotes(Context context) {
+    @Override
+    public void onPerformSync(Account account, Bundle bundle, String authority,
+                              ContentProviderClient contentProviderClient,
+                              SyncResult syncResult) {
 
-        Timber.d("Running sync job");
+        Timber.d("Running SyncAdapter");
 
         Calendar from = Calendar.getInstance();
         Calendar to = Calendar.getInstance();
@@ -54,27 +66,21 @@ public final class QuoteSyncJob {
 
         try {
 
-            Set<String> stockPref = PrefUtils.getStocks(context);
-            Set<String> stockCopy = new HashSet<>();
-            stockCopy.addAll(stockPref);
-            String[] stockArray = stockPref.toArray(new String[stockPref.size()]);
+            Set<String> stockPref = PrefUtils.getStocks(mContext);
 
-            Timber.d(stockCopy.toString());
-
-            if (stockArray.length == 0) {
+            if (stockPref.size() == 0) {
+                Timber.d("No Stocks to Fetch");
                 return;
             }
 
-            Map<String, Stock> quotes = YahooFinance.get(stockArray);
-            Iterator<String> iterator = stockCopy.iterator();
+            Timber.d("Stock pref: " + stockPref.toString());
 
-            Timber.d(quotes.toString());
+            Map<String, Stock> quotes = YahooFinance.get(
+                    stockPref.toArray(new String[stockPref.size()]));
 
             ArrayList<ContentValues> quoteCVs = new ArrayList<>();
 
-            while (iterator.hasNext()) {
-
-                String symbol = iterator.next();
+            for (String symbol: stockPref) {
 
                 Stock stock = quotes.get(symbol);
                 StockQuote quote = stock.getQuote();
@@ -101,7 +107,7 @@ public final class QuoteSyncJob {
                         historyBuilder.append(", ");
                         historyBuilder.append(it.getHigh());
                         historyBuilder.append("\n");
-                        Timber.d("History Quote: " + historyBuilder.toString());
+                        // Timber.d("History Quote: " + historyBuilder.toString());
                     }
 
                     ContentValues quoteCV = new ContentValues();
@@ -116,73 +122,29 @@ public final class QuoteSyncJob {
                     quoteCVs.add(quoteCV);
 
                 } catch (NullPointerException e) {
-                    Timber.e(e);
+                    Timber.e("Error:" + e);
+                    stockPref.remove(symbol);
+                    Intent stockNotFound = new Intent(ACTION_STOCK_NOT_FOUND);
+                    stockNotFound.putExtra(MainActivity.EXTRA_SYMBOL, symbol);
+                    mContext.sendBroadcast(stockNotFound);
                 }
 
             }
 
-            context.getContentResolver()
+            mContentResolver
                     .bulkInsert(
                             Contract.Quote.URI,
-                            quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
+                            quoteCVs.toArray(new ContentValues[quoteCVs.size()])
+                    );
 
             Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
-            context.sendBroadcast(dataUpdatedIntent);
+            Timber.d("sendBroadcast: " + dataUpdatedIntent.getAction());
+            mContext.sendBroadcast(dataUpdatedIntent);
 
         } catch (IOException exception) {
             Timber.e(exception, "Error fetching stock quotes");
         }
-    }
-
-    private static void schedulePeriodic(Context context) {
-        Timber.d("Scheduling a periodic task");
-
-
-        JobInfo.Builder builder = new JobInfo.Builder(PERIODIC_ID, new ComponentName(context, QuoteJobService.class));
-
-
-        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                .setPeriodic(PERIOD)
-                .setBackoffCriteria(INITIAL_BACKOFF, JobInfo.BACKOFF_POLICY_EXPONENTIAL);
-
-
-        JobScheduler scheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-
-        scheduler.schedule(builder.build());
-    }
-
-
-    public static synchronized void initialize(final Context context) {
-
-        schedulePeriodic(context);
-        syncImmediately(context);
 
     }
-
-    public static synchronized void syncImmediately(Context context) {
-
-        if (Utility.isNetworkAvailable(context)) {
-            Intent nowIntent = new Intent(context, QuoteIntentService.class);
-            context.startService(nowIntent);
-        } else {
-
-            JobInfo.Builder builder = new JobInfo.Builder(
-                    ONE_OFF_ID,
-                    new ComponentName(context, QuoteJobService.class)
-            );
-
-
-            builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                    .setBackoffCriteria(INITIAL_BACKOFF, JobInfo.BACKOFF_POLICY_EXPONENTIAL);
-
-
-            JobScheduler scheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-
-            scheduler.schedule(builder.build());
-
-
-        }
-    }
-
 
 }

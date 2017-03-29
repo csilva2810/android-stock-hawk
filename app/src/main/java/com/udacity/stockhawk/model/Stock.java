@@ -1,7 +1,11 @@
 package com.udacity.stockhawk.model;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.udacity.stockhawk.data.Contract;
 
 import java.util.ArrayList;
 
@@ -11,58 +15,58 @@ import java.util.ArrayList;
 
 public class Stock implements Parcelable {
 
-    private float price;
-    private float absoluteChange;
-    private float percentageChange;
-    private ArrayList<History> history;
-    private String name;
+    private float mPrice;
+    private float mAbsoluteChange;
+    private float mPercentageChange;
+    private ArrayList<History> mHistory;
+    private String mName;
 
-    public Stock(float price, float absoluteChange, float percentageChange, ArrayList<History> history, String name) {
-        this.price = price;
-        this.absoluteChange = absoluteChange;
-        this.percentageChange = percentageChange;
-        this.history = history;
-        this.name = name;
+    public Stock(float mPrice, float mAbsoluteChange, float mPercentageChange, ArrayList<History> mHistory, String mName) {
+        this.mPrice = mPrice;
+        this.mAbsoluteChange = mAbsoluteChange;
+        this.mPercentageChange = mPercentageChange;
+        this.mHistory = mHistory;
+        this.mName = mName;
     }
 
-    public float getPrice() {
-        return price;
+    public float getmPrice() {
+        return mPrice;
     }
 
-    public void setPrice(float price) {
-        this.price = price;
+    public void setmPrice(float mPrice) {
+        this.mPrice = mPrice;
     }
 
-    public float getAbsoluteChange() {
-        return absoluteChange;
+    public float getmAbsoluteChange() {
+        return mAbsoluteChange;
     }
 
-    public void setAbsoluteChange(float absoluteChange) {
-        this.absoluteChange = absoluteChange;
+    public void setmAbsoluteChange(float mAbsoluteChange) {
+        this.mAbsoluteChange = mAbsoluteChange;
     }
 
-    public float getPercentageChange() {
-        return percentageChange;
+    public float getmPercentageChange() {
+        return mPercentageChange;
     }
 
-    public void setPercentageChange(float percentageChange) {
-        this.percentageChange = percentageChange;
+    public void setmPercentageChange(float mPercentageChange) {
+        this.mPercentageChange = mPercentageChange;
     }
 
-    public ArrayList<History> getHistory() {
-        return history;
+    public ArrayList<History> getmHistory() {
+        return mHistory;
     }
 
-    public void setHistory(ArrayList<History> history) {
-        this.history = history;
+    public void setmHistory(ArrayList<History> mHistory) {
+        this.mHistory = mHistory;
     }
 
-    public String getName() {
-        return name;
+    public String getmName() {
+        return mName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setmName(String mName) {
+        this.mName = mName;
     }
 
     @Override
@@ -72,19 +76,19 @@ public class Stock implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeFloat(this.price);
-        dest.writeFloat(this.absoluteChange);
-        dest.writeFloat(this.percentageChange);
-        dest.writeTypedList(this.history);
-        dest.writeString(this.name);
+        dest.writeFloat(this.mPrice);
+        dest.writeFloat(this.mAbsoluteChange);
+        dest.writeFloat(this.mPercentageChange);
+        dest.writeTypedList(this.mHistory);
+        dest.writeString(this.mName);
     }
 
     protected Stock(Parcel in) {
-        this.price = in.readFloat();
-        this.absoluteChange = in.readFloat();
-        this.percentageChange = in.readFloat();
-        this.history = in.createTypedArrayList(History.CREATOR);
-        this.name = in.readString();
+        this.mPrice = in.readFloat();
+        this.mAbsoluteChange = in.readFloat();
+        this.mPercentageChange = in.readFloat();
+        this.mHistory = in.createTypedArrayList(History.CREATOR);
+        this.mName = in.readString();
     }
 
     public static final Parcelable.Creator<Stock> CREATOR = new Parcelable.Creator<Stock>() {
@@ -98,4 +102,48 @@ public class Stock implements Parcelable {
             return new Stock[size];
         }
     };
+
+    public static Stock getStockForSymbol(Context context, String symbol) {
+
+        String[] columns = Contract.Quote.QUOTE_COLUMNS.toArray(new String[]{});
+
+        Cursor c = context.getContentResolver().query(
+                Contract.Quote.makeUriForStock(symbol),
+                columns,
+                null, null, null
+        );
+
+        if (c == null || !c.moveToFirst()) {
+            return null;
+        }
+
+        ArrayList<History> historyList = new ArrayList<>();
+
+        float price = Float.parseFloat(c.getString(Contract.Quote.POSITION_PRICE));
+        float absoluteChange = Float.parseFloat(c.getString(Contract.Quote.POSITION_ABSOLUTE_CHANGE));
+        float percentageChange = Float.parseFloat(c.getString(Contract.Quote.POSITION_PERCENTAGE_CHANGE));
+        String history = c.getString(Contract.Quote.POSITION_HISTORY);
+        String name = c.getString(Contract.Quote.POSITION_NAME);
+
+        String[] historyArray = history.split("\n");
+
+        for (String h : historyArray) {
+
+            String[] histDetail = h.split(",");
+
+            String date = histDetail[0];
+            float datePrice = Float.valueOf(histDetail[1]);
+            float low = Float.valueOf(histDetail[2]);
+            float high = Float.valueOf(histDetail[3]);
+
+            historyList.add(new History(date, datePrice, low, high));
+
+        }
+
+        c.close();
+
+        return new Stock(price, absoluteChange, percentageChange, historyList, name);
+
+    }
+
 }

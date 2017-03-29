@@ -3,6 +3,7 @@ package com.udacity.stockhawk.ui;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,38 +13,57 @@ import android.widget.TextView;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.helper.ItemTouchHelperAdapter;
 import com.udacity.stockhawk.utils.NumberUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
-class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
+class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder>
+    implements ItemTouchHelperAdapter {
 
-    private final Context context;
+    private final Context mContext;
 
-    private Cursor cursor;
+    private Cursor mCursor;
     private final StockAdapterOnClickHandler clickHandler;
 
-    StockAdapter(Context context, StockAdapterOnClickHandler clickHandler) {
-        this.context = context;
-        this.clickHandler = clickHandler;
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        return false;
     }
 
-    void setCursor(Cursor cursor) {
-        this.cursor = cursor;
+    @Override
+    public void onItemDismiss(int position) {
+
+        String symbol = getSymbolAtPosition(position);
+
+        Uri stockUri = Contract.Quote.makeUriForStock(symbol);
+        mContext.getContentResolver().delete(stockUri, null, null);
+
+        PrefUtils.removeStock(mContext, symbol);
+
+    }
+
+    StockAdapter(Context context) {
+        this.mContext = context;
+        this.clickHandler = (StockAdapterOnClickHandler) mContext;
+    }
+
+    public void setCursor(Cursor cursor) {
+        this.mCursor = cursor;
         notifyDataSetChanged();
     }
 
     String getSymbolAtPosition(int position) {
-
-        cursor.moveToPosition(position);
-        return cursor.getString(Contract.Quote.POSITION_SYMBOL);
+        mCursor.moveToPosition(position);
+        return mCursor.getString(Contract.Quote.POSITION_SYMBOL);
     }
 
     @Override
     public StockViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View item = LayoutInflater.from(context).inflate(R.layout.list_item_quote, parent, false);
+        View item = LayoutInflater.from(mContext).inflate(R.layout.list_item_quote, parent, false);
 
         return new StockViewHolder(item);
     }
@@ -51,18 +71,18 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
     @Override
     public void onBindViewHolder(StockViewHolder holder, int position) {
 
-        cursor.moveToPosition(position);
+        mCursor.moveToPosition(position);
 
-        String stockName = cursor.getString(Contract.Quote.POSITION_NAME);
-        String symbol = cursor.getString(Contract.Quote.POSITION_SYMBOL);
-        String price = NumberUtils.formatMoney(cursor.getFloat(Contract.Quote.POSITION_PRICE));
+        String stockName = mCursor.getString(Contract.Quote.POSITION_NAME);
+        String symbol = mCursor.getString(Contract.Quote.POSITION_SYMBOL);
+        String price = NumberUtils.formatMoney(mCursor.getFloat(Contract.Quote.POSITION_PRICE));
 
         holder.symbol.setText(symbol);
         holder.price.setText(price);
         holder.tvStockName.setText(stockName);
 
-        float rawAbsoluteChange = cursor.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
-        float percentageChange = cursor.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
+        float rawAbsoluteChange = mCursor.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
+        float percentageChange = mCursor.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
 
         if (rawAbsoluteChange > 0) {
             holder.change.setBackgroundResource(R.drawable.percent_change_pill_green);
@@ -74,7 +94,7 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
         String percentage = NumberUtils.formatPercent(percentageChange / 100);
         String changeDesc;
 
-        if (PrefUtils.getDisplayMode(context).equals(context.getString(R.string.pref_display_mode_absolute_key))) {
+        if (PrefUtils.getDisplayMode(mContext).equals(mContext.getString(R.string.pref_display_mode_absolute_key))) {
             holder.change.setText(change);
             changeDesc = change;
         } else {
@@ -83,17 +103,17 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
         }
 
         // setting more useful content descriptions
-        holder.symbol.setContentDescription(context.getString(R.string.a11y_symbol, symbol));
-        holder.price.setContentDescription(context.getString(R.string.a11y_stock_price, price));
-        holder.change.setContentDescription(context.getString(R.string.a11y_stock_change, changeDesc));
+        holder.symbol.setContentDescription(mContext.getString(R.string.a11y_symbol, symbol));
+        holder.price.setContentDescription(mContext.getString(R.string.a11y_stock_price, price));
+        holder.change.setContentDescription(mContext.getString(R.string.a11y_stock_change, changeDesc));
 
     }
 
     @Override
     public int getItemCount() {
         int count = 0;
-        if (cursor != null) {
-            count = cursor.getCount();
+        if (mCursor != null) {
+            count = mCursor.getCount();
         }
         return count;
     }
@@ -118,9 +138,9 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder> {
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
-            cursor.moveToPosition(adapterPosition);
-            int symbolColumn = cursor.getColumnIndex(Contract.Quote.COLUMN_SYMBOL);
-            clickHandler.onClick(cursor.getString(symbolColumn));
+            mCursor.moveToPosition(adapterPosition);
+            int symbolColumn = mCursor.getColumnIndex(Contract.Quote.COLUMN_SYMBOL);
+            clickHandler.onClick(mCursor.getString(symbolColumn));
         }
 
 

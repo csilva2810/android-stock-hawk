@@ -1,13 +1,8 @@
 package com.udacity.stockhawk.ui;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +16,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import lecho.lib.hellocharts.formatter.AxisValueFormatter;
 import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
@@ -29,7 +23,6 @@ import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.view.LineChartView;
-import timber.log.Timber;
 
 public class DetailChartFragment extends Fragment {
 
@@ -65,13 +58,13 @@ public class DetailChartFragment extends Fragment {
 
         for (History h : historyList.subList(0, 5)) {
 
-            values.add(new PointValue(Float.valueOf(h.getDate()), h.getPrice()));
+            values.add(new PointValue(Float.valueOf(h.getmDate()), h.getmPrice()));
 
-            AxisValue xValue = new AxisValue(Float.parseFloat(h.getDate()));
-            xValue.setLabel( DateUtils.getChartLabelDate(Long.valueOf(h.getDate())) );
+            AxisValue xValue = new AxisValue(Float.parseFloat(h.getmDate()));
+            xValue.setLabel( DateUtils.getChartLabelDate(Long.valueOf(h.getmDate())) );
             axisXValues.add(xValue);
 
-            axisYValues.add(new AxisValue(h.getPrice()));
+            axisYValues.add(new AxisValue(h.getmPrice()));
 
         }
 

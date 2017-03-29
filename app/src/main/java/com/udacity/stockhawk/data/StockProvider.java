@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import timber.log.Timber;
+
 
 public class StockProvider extends ContentProvider {
 
@@ -18,7 +20,7 @@ public class StockProvider extends ContentProvider {
 
     private static final UriMatcher uriMatcher = buildUriMatcher();
 
-    private DbHelper dbHelper;
+    private DbHelper mDbHelper;
 
     private static UriMatcher buildUriMatcher() {
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -30,15 +32,16 @@ public class StockProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        dbHelper = new DbHelper(getContext());
+        mDbHelper = new DbHelper(getContext());
         return true;
     }
 
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+
         Cursor returnCursor;
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         switch (uriMatcher.match(uri)) {
             case QUOTE:
@@ -86,7 +89,7 @@ public class StockProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         Uri returnUri;
 
         switch (uriMatcher.match(uri)) {
@@ -112,13 +115,18 @@ public class StockProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
-        final SQLiteDatabase db = dbHelper.getWritableDatabase();
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int rowsDeleted;
 
         if (null == selection) {
             selection = "1";
         }
-        switch (uriMatcher.match(uri)) {
+
+        int match = uriMatcher.match(uri);
+
+        Timber.d("Delete match: " + match);
+
+        switch (match) {
             case QUOTE:
                 rowsDeleted = db.delete(
                         Contract.Quote.TABLE_NAME,
@@ -132,9 +140,10 @@ public class StockProvider extends ContentProvider {
                 String symbol = Contract.Quote.getStockFromUri(uri);
                 rowsDeleted = db.delete(
                         Contract.Quote.TABLE_NAME,
-                        '"' + symbol + '"' + " =" + Contract.Quote.COLUMN_SYMBOL,
-                        selectionArgs
+                        Contract.Quote.COLUMN_SYMBOL + " = ? ",
+                        new String[]{ symbol }
                 );
+                Timber.d("StockProvider.delete: " + symbol + " " + rowsDeleted);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown URI:" + uri);
@@ -158,7 +167,7 @@ public class StockProvider extends ContentProvider {
     @Override
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
 
-        final SQLiteDatabase db = dbHelper.getWritableDatabase();
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         switch (uriMatcher.match(uri)) {
             case QUOTE:
@@ -186,7 +195,6 @@ public class StockProvider extends ContentProvider {
             default:
                 return super.bulkInsert(uri, values);
         }
-
 
     }
 }

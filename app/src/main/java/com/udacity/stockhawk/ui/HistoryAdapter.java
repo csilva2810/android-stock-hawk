@@ -16,7 +16,6 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder> {
 
@@ -53,8 +52,8 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
 
         History history = historyList.get(position);
 
-        String date = DateUtils.getDisplayDate(Long.valueOf(history.getDate()));
-        String price = NumberUtils.formatMoney(history.getPrice());
+        String date = DateUtils.getDisplayDate(Long.valueOf(history.getmDate()));
+        String price = NumberUtils.formatMoney(history.getmPrice());
 
         holder.tvDate.setText(date);
         holder.tvPrice.setText(price);

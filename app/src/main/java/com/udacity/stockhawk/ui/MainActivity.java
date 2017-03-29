@@ -1,6 +1,9 @@
 package com.udacity.stockhawk.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -8,7 +11,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -22,7 +24,9 @@ import android.widget.Toast;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
-import com.udacity.stockhawk.sync.QuoteSyncJob;
+import com.udacity.stockhawk.helper.SimpleItemTouchHelperCallback;
+import com.udacity.stockhawk.sync.QuoteSyncAdapter;
+import com.udacity.stockhawk.sync.SyncUtils;
 import com.udacity.stockhawk.utils.Utility;
 
 import butterknife.BindView;
@@ -34,16 +38,20 @@ public class MainActivity extends AppCompatActivity implements
         SwipeRefreshLayout.OnRefreshListener,
         StockAdapter.StockAdapterOnClickHandler {
 
+    public static final String STOCK_DIALOG_FRAGMENT = "StockDialogFragment";
     public static final String EXTRA_SYMBOL = "EXTRA_SYMBOL";
+    public static final String ACTION_ADD_STOCK = "ACTION_ADD_STOCK";
 
     private static final int STOCK_LOADER = 0;
 
-    @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.recycler_view) RecyclerView stockRecyclerView;
-    @BindView(R.id.swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
-    @BindView(R.id.error) TextView error;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.recycler_view) RecyclerView mStockRecyclerView;
+    @BindView(R.id.swipe_refresh) SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.error) TextView mErrorTextView;
 
-    private StockAdapter adapter;
+    private ItemTouchHelper mItemTouchHelper;
+    private StockAdapter mAdapter;
+    private BroadcastReceiver mStockNotFoundBr;
 
     @Override
     public void onClick(String symbol) {
@@ -60,61 +68,91 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        toolbar.setElevation(12);
-        setSupportActionBar(toolbar);
+        mToolbar.setElevation(getResources().getDimension(R.dimen.toolbar_elevation));
+        setSupportActionBar(mToolbar);
 
-        adapter = new StockAdapter(this, this);
-        stockRecyclerView.setAdapter(adapter);
+        mAdapter = new StockAdapter(this);
+        mStockRecyclerView.setAdapter(mAdapter);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        stockRecyclerView.setLayoutManager(layoutManager);
+        mStockRecyclerView.setLayoutManager(layoutManager);
 
-        swipeRefreshLayout.setOnRefreshListener(this);
-        swipeRefreshLayout.setRefreshing(true);
-        onRefresh();
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mAdapter);
+        mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper.attachToRecyclerView(mStockRecyclerView);
 
-        QuoteSyncJob.initialize(this);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setRefreshing(true);
+
         getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return false;
-            }
+        SyncUtils.CreateSyncAccount(MainActivity.this);
 
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                String symbol = adapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
-                PrefUtils.removeStock(MainActivity.this, symbol);
-                getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
+        String intentAction = getIntent().getAction();
+        if (intentAction != null) {
+            if (intentAction.equals(ACTION_ADD_STOCK)) {
+                onClickAddStock(null);
             }
-        }).attachToRecyclerView(stockRecyclerView);
+        }
 
+    }
+
+    protected void registerStockNotFoundReceiver() {
+        mStockNotFoundBr = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String message = getString(R.string.stock_not_found,
+                        intent.getStringExtra(EXTRA_SYMBOL));
+
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        IntentFilter stockNotFoundFilter = new IntentFilter(QuoteSyncAdapter.ACTION_STOCK_NOT_FOUND);
+        stockNotFoundFilter.addAction(QuoteSyncAdapter.ACTION_STOCK_NOT_FOUND);
+        this.registerReceiver(mStockNotFoundBr, stockNotFoundFilter);
+    }
+
+    protected void unregisterStockNotFoundReceiver() {
+        this.unregisterReceiver(mStockNotFoundBr);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterStockNotFoundReceiver();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerStockNotFoundReceiver();
     }
 
     @Override
     public void onRefresh() {
 
-        QuoteSyncJob.syncImmediately(this);
-
-        if (!Utility.isNetworkAvailable(this) && adapter.getItemCount() == 0) {
-            swipeRefreshLayout.setRefreshing(false);
-            error.setText(getString(R.string.error_no_network));
-            error.setVisibility(View.VISIBLE);
+        if (!Utility.isNetworkAvailable(this) && mAdapter.getItemCount() == 0) {
+            mSwipeRefreshLayout.setRefreshing(false);
+            mErrorTextView.setText(getString(R.string.error_no_network));
+            mErrorTextView.setVisibility(View.VISIBLE);
         } else if (!Utility.isNetworkAvailable(this)) {
-            swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(this, R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
+            mSwipeRefreshLayout.setRefreshing(false);
+            mErrorTextView.setText(R.string.toast_no_connectivity);
+            mErrorTextView.setVisibility(View.VISIBLE);
         } else if (PrefUtils.getStocks(this).size() == 0) {
-            swipeRefreshLayout.setRefreshing(false);
-            error.setText(getString(R.string.error_no_stocks));
-            error.setVisibility(View.VISIBLE);
+            mSwipeRefreshLayout.setRefreshing(false);
+            mErrorTextView.setText(getString(R.string.error_no_stocks));
+            mErrorTextView.setVisibility(View.VISIBLE);
         } else {
-            error.setVisibility(View.GONE);
+            mErrorTextView.setVisibility(View.GONE);
+            SyncUtils.TriggerRefresh(MainActivity.this);
         }
+
     }
 
     public void onClickAddStock(@SuppressWarnings("UnusedParameters") View view) {
-        new AddStockDialog().show(getFragmentManager(), "StockDialogFragment");
+        new AddStockDialog().show(getFragmentManager(), STOCK_DIALOG_FRAGMENT);
     }
 
     void addStock(String symbol) {
@@ -122,10 +160,9 @@ public class MainActivity extends AppCompatActivity implements
 
             if (Utility.isNetworkAvailable(this)) {
 
-                swipeRefreshLayout.setRefreshing(true);
-
-                PrefUtils.addStock(this, symbol);
-                QuoteSyncJob.syncImmediately(this);
+                mSwipeRefreshLayout.setRefreshing(true);
+                PrefUtils.addStock(MainActivity.this, symbol);
+                SyncUtils.TriggerRefresh(MainActivity.this);
 
             } else {
                 String message = getString(R.string.error_no_network_try_again);
@@ -145,22 +182,20 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        swipeRefreshLayout.setRefreshing(false);
+        mSwipeRefreshLayout.setRefreshing(false);
 
         if (data.getCount() != 0) {
-            error.setVisibility(View.GONE);
+            mErrorTextView.setVisibility(View.GONE);
         }
 
-        adapter.setCursor(data);
+        mAdapter.setCursor(data);
     }
-
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        swipeRefreshLayout.setRefreshing(false);
-        adapter.setCursor(null);
+        mSwipeRefreshLayout.setRefreshing(false);
+        mAdapter.setCursor(null);
     }
-
 
     private void setDisplayModeMenuItemIcon(MenuItem item) {
         if (PrefUtils.getDisplayMode(this)
@@ -188,9 +223,10 @@ public class MainActivity extends AppCompatActivity implements
         if (id == R.id.action_change_units) {
             PrefUtils.toggleDisplayMode(this);
             setDisplayModeMenuItemIcon(item);
-            adapter.notifyDataSetChanged();
+            mAdapter.notifyDataSetChanged();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

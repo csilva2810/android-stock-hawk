@@ -5,41 +5,41 @@ import android.os.Parcelable;
 
 public class History implements Parcelable {
 
-    private String date;
-    private float price;
-    private float low;
-    private float high;
+    private String mDate;
+    private float mPrice;
+    private float mLow;
+    private float mHigh;
 
-    public String getDate() {
-        return date;
+    public String getmDate() {
+        return mDate;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setmDate(String mDate) {
+        this.mDate = mDate;
     }
 
-    public float getPrice() {
-        return price;
+    public float getmPrice() {
+        return mPrice;
     }
 
-    public void setPrice(float price) {
-        this.price = price;
+    public void setmPrice(float mPrice) {
+        this.mPrice = mPrice;
     }
 
-    public float getLow() {
-        return low;
+    public float getmLow() {
+        return mLow;
     }
 
-    public void setLow(float low) {
-        this.low = low;
+    public void setmLow(float mLow) {
+        this.mLow = mLow;
     }
 
-    public float getHigh() {
-        return high;
+    public float getmHigh() {
+        return mHigh;
     }
 
-    public void setHigh(float high) {
-        this.high = high;
+    public void setmHigh(float mHigh) {
+        this.mHigh = mHigh;
     }
 
     @Override
@@ -49,24 +49,24 @@ public class History implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.date);
-        dest.writeFloat(this.price);
-        dest.writeFloat(this.low);
-        dest.writeFloat(this.high);
+        dest.writeString(this.mDate);
+        dest.writeFloat(this.mPrice);
+        dest.writeFloat(this.mLow);
+        dest.writeFloat(this.mHigh);
     }
 
-    public History(String date, float price, float low, float high) {
-        this.date = date;
-        this.price = price;
-        this.low = low;
-        this.high = high;
+    public History(String mDate, float mPrice, float mLow, float mHigh) {
+        this.mDate = mDate;
+        this.mPrice = mPrice;
+        this.mLow = mLow;
+        this.mHigh = mHigh;
     }
 
     protected History(Parcel in) {
-        this.date = in.readString();
-        this.price = in.readFloat();
-        this.low = in.readFloat();
-        this.high = in.readFloat();
+        this.mDate = in.readString();
+        this.mPrice = in.readFloat();
+        this.mLow = in.readFloat();
+        this.mHigh = in.readFloat();
     }
 
     public static final Parcelable.Creator<History> CREATOR = new Parcelable.Creator<History>() {

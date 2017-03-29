@@ -7,4 +7,17 @@
     <dimen name="fab_elevation_pressed">12dp</dimen>
     <dimen name="fab_border">0dp</dimen>
     <dimen name="pill_border_radius">4dp</dimen>
+    <dimen name="toolbar_elevation">8dp</dimen>
+
+    <!--
+Refer to App Widget Documentation for margin information
+http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
+    -->
+    <dimen name="widget_margin">8dp</dimen>
+    <dimen name="stock_list_widget_minHeight">180dp</dimen>
+    <dimen name="stock_list_widget_minWidth">250dp</dimen>
+
+    <dimen name="list_item_height">60dp</dimen>
+    <dimen name="widget_title_elevation">2dp</dimen>
+    <dimen name="widget_button_width">32dp</dimen>
 </resources>

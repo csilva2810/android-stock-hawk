@@ -24,7 +24,7 @@ import butterknife.ButterKnife;
 public class AddStockDialog extends DialogFragment {
 
     @SuppressWarnings("WeakerAccess")
-    @BindView(R.id.et_stock_symbol) EditText etStockSymbol;
+    @BindView(R.id.et_stock_symbol) EditText mStockSymbol;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -36,7 +36,7 @@ public class AddStockDialog extends DialogFragment {
 
         ButterKnife.bind(this, custom);
 
-        etStockSymbol.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mStockSymbol.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 addStock();
@@ -68,7 +68,7 @@ public class AddStockDialog extends DialogFragment {
     private void addStock() {
         Activity parent = getActivity();
         if (parent instanceof MainActivity) {
-            ((MainActivity) parent).addStock(etStockSymbol.getText().toString());
+            ((MainActivity) parent).addStock(mStockSymbol.getText().toString());
         }
         dismissAllowingStateLoss();
     }

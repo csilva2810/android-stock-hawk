@@ -1,33 +1,28 @@
 <resources xmlns:g="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Stock Hawk</string>
 
+    <!-- not transtable strings -->
+    <string name="app_shared_preferences_key" translatable="false">com.udacity.stockhawk.preferences</string>
     <string name="pref_stocks_initialized_key" translatable="false">initialized</string>
+    <string name="pref_stocks_key" translatable="false">pref_stocks</string>
+    <string name="pref_display_mode_key" translatable="false">displayMode</string>
+    <string name="pref_display_mode_default" translatable="false">@string/pref_display_mode_percentage_key</string>
+    <string name="pref_display_mode_absolute_key" translatable="false">absolute</string>
+    <string name="pref_display_mode_percentage_key" translatable="false">percentage</string>
+    <string name="default_stocks_yahoo" translatable="false">YHOO</string>
+    <string name="default_stocks_apple" translatable="false">AAPL</string>
+    <string name="default_stocks_microsoft" translatable="false">MSFT</string>
+    <string name="default_stocks_facebook" translatable="false">FB</string>
+    <string name="action_change_units">@string/pref_display_mode_key</string>
 
-    <string name="pref_stocks_key">stocks</string>
-
-    <string name="pref_display_mode_key">displayMode</string>
-    <string name="pref_display_mode_default">@string/pref_display_mode_percentage_key</string>
-
+    <!-- strings used for content description -->
     <string name="a11y_display_mode_abs">Display Mode Absolute</string>
     <string name="a11y_display_mode_percent">Display Mode Percentage</string>
     <string name="a11y_symbol">Stock symbol <xliff:g id="symbol">%1$s</xliff:g></string>
-    <string name="a11y_stock_price">Stock price <xliff:g id="price">%1$s</xliff:g></string>
+    <string name="a11y_stock_price">Stock mPrice <xliff:g id="mPrice">%1$s</xliff:g></string>
     <string name="a11y_stock_change">Stock change <xliff:g id="change">%1$s</xliff:g></string>
-
     <string name="a11y_detail_title"><xliff:g id="stock_name">%1$s</xliff:g> details view</string>
-    <string name="a11y_stock_date">Stock date <xliff:g id="stock_date">%1$s</xliff:g></string>
-
-    <string name="pref_display_mode_absolute_key">absolute</string>
-    <string name="pref_display_mode_percentage_key">percentage</string>
-
-    <string name="default_stocks_yahoo">YHOO</string>
-    <string name="default_stocks_apple">AAPL</string>
-    <string name="default_stocks_microsoft">MSFT</string>
-    <string name="default_stocks_facebook">FB</string>
-
-
-    <string name="action_change_units">@string/pref_display_mode_key</string>
-
+    <string name="a11y_stock_date">Stock mDate <xliff:g id="stock_date">%1$s</xliff:g></string>
 
     <string name="dialog_title">Add New Stock</string>
     <string name="dialog_hint">Type the Stock Symbol (e.g. GOOG)</string>
@@ -38,21 +33,30 @@
     <string name="error_no_stocks">No stocks added! Hit the floating action button to add one.</string>
     <string name="error_no_network_try_again">No stocks added! Try again later.</string>
 
-    <string name="toast_stock_added_no_connectivity">Symbol %s added. Will refresh when network available.</string>
+    <string name="toast_stock_added_no_connectivity">Symbol <xliff:g>%1$s</xliff:g> added. Will refresh when network available.</string>
     <string name="toast_no_connectivity">Will refresh when network available.</string>
-
-    <string name="message_symbol_not_found">Symbol %1$s not found.</string>
+    <string name="message_symbol_not_found">Symbol <xliff:g>%1$s</xliff:g> not found.</string>
 
     <string name="message_update_success">Update With Success</string>
     <string name="tab_chart_content_description">Chart Visualization</string>
     <string name="tab_list_content_description">List Visualization</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="chart_date_label">Date</string>
     <string name="chart_price_label">Price</string>
     <string name="chart_tab_title">Chart</string>
     <string name="list_tab_title">List</string>
     <string name="add_new_stock">Add New Stock</string>
+    <string name="appwidget_title">Stocks</string>
+    <string name="add_widget">Add widget</string>
+    <string name="widget_stock_list_title">Stocks</string>
+
+    <string name="stocks_empty">No Stocks Available.</string>
+    <string name="title_widget_stocks">Stocks Widget</string>
+    <string name="stock_not_found">Stock <xliff:g>%1$s</xliff:g> not Found!</string>
+
+    <!-- Quote SyncAdapter -->
+    <string name="syncadapter_authority" translatable="false">com.udacity.stockhawk</string>
+    <string name="syncadapter_account_type" translatable="false">stockhawksync</string>
+    <string name="syncadapter_account" translatable="false">StockHawk</string>
 
 </resources>
