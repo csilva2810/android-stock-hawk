@@ -1,6 +1,7 @@
 package com.udacity.stockhawk.ui;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -140,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements
             mSwipeRefreshLayout.setRefreshing(false);
             mErrorTextView.setText(R.string.toast_no_connectivity);
             mErrorTextView.setVisibility(View.VISIBLE);
-        } else if (PrefUtils.getStocks(this).size() == 0) {
+        } else if (mAdapter.getItemCount() == 0) {
             mSwipeRefreshLayout.setRefreshing(false);
             mErrorTextView.setText(getString(R.string.error_no_stocks));
             mErrorTextView.setVisibility(View.VISIBLE);
@@ -161,7 +162,16 @@ public class MainActivity extends AppCompatActivity implements
             if (Utility.isNetworkAvailable(this)) {
 
                 mSwipeRefreshLayout.setRefreshing(true);
-                PrefUtils.addStock(MainActivity.this, symbol);
+
+                ContentValues cv = new ContentValues();
+                cv.put(Contract.Quote.COLUMN_SYMBOL, symbol);
+                cv.put(Contract.Quote.COLUMN_PRICE, "");
+                cv.put(Contract.Quote.COLUMN_PERCENTAGE_CHANGE, "");
+                cv.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, "");
+                cv.put(Contract.Quote.COLUMN_HISTORY, "");
+                cv.put(Contract.Quote.COLUMN_NAME, "");
+                getContentResolver().insert(Contract.Quote.URI, cv);
+
                 SyncUtils.TriggerRefresh(MainActivity.this);
 
             } else {

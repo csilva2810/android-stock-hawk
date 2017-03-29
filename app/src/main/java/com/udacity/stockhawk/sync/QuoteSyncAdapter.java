@@ -8,9 +8,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SyncResult;
+import android.database.Cursor;
 import android.os.Bundle;
 
-import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.ui.MainActivity;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +65,24 @@ public class QuoteSyncAdapter extends AbstractThreadedSyncAdapter {
 
         try {
 
-            Set<String> stockPref = PrefUtils.getStocks(mContext);
+            Set<String> stockPref = new HashSet<String>();
+            boolean isInitialized = PrefUtils.isInitialized(mContext);
+
+            if (!isInitialized) {
+                stockPref = PrefUtils.initializeStocks(mContext);
+            } else {
+                final int SYMBOL_INDEX = 0;
+                Cursor c = mContentResolver.query(
+                        Contract.Quote.URI,
+                        new String[]{ Contract.Quote.COLUMN_SYMBOL },
+                        null, null, Contract.Quote.COLUMN_SYMBOL);
+                if (c != null) {
+                    while (c.moveToNext()) {
+                        stockPref.add(c.getString(SYMBOL_INDEX));
+                    }
+                    c.close();
+                }
+            }
 
             if (stockPref.size() == 0) {
                 Timber.d("No Stocks to Fetch");

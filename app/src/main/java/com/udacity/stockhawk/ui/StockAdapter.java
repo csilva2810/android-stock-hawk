@@ -41,8 +41,6 @@ class StockAdapter extends RecyclerView.Adapter<StockAdapter.StockViewHolder>
         Uri stockUri = Contract.Quote.makeUriForStock(symbol);
         mContext.getContentResolver().delete(stockUri, null, null);
 
-        PrefUtils.removeStock(mContext, symbol);
-
     }
 
     StockAdapter(Context context) {

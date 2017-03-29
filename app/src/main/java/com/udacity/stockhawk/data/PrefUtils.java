@@ -20,6 +20,12 @@ public final class PrefUtils {
         );
     }
 
+    public static boolean isInitialized(Context context) {
+        String initializedKey = context.getString(R.string.pref_stocks_initialized_key);
+        SharedPreferences prefs = getAppSharedPreferences(context);
+        return prefs.getBoolean(initializedKey, false);
+    }
+
     public static Set<String> initializeStocks(Context context) {
 
         String stocksKey = context.getString(R.string.pref_stocks_key);
@@ -39,50 +45,6 @@ public final class PrefUtils {
 
         return stocks;
 
-    }
-
-    public static Set<String> getStocks(Context context) {
-
-        String stocksKey = context.getString(R.string.pref_stocks_key);
-        String initializedKey = context.getString(R.string.pref_stocks_initialized_key);
-
-        SharedPreferences prefs = getAppSharedPreferences(context);
-        boolean initialized = prefs.getBoolean(initializedKey, false);
-
-        if (!initialized) {
-            return initializeStocks(context);
-        } else {
-            return prefs.getStringSet(stocksKey, new HashSet<String>());
-        }
-
-    }
-
-    private static void editStockPref(Context context, String symbol, Boolean add) {
-        Timber.d("editStockPref: " + symbol + " " + add);
-
-        String stocksKey = context.getString(R.string.pref_stocks_key);
-        Set<String> stocks = getStocks(context);
-        Set<String> stocksCopy = new HashSet<>(stocks);
-
-        if (add) {
-            stocksCopy.add(symbol);
-        } else {
-            stocksCopy.remove(symbol);
-        }
-
-        SharedPreferences prefs = getAppSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putStringSet(stocksKey, stocksCopy   );
-        editor.apply();
-
-    }
-
-    public static void addStock(Context context, String symbol) {
-        editStockPref(context, symbol, true);
-    }
-
-    public static void removeStock(Context context, String symbol) {
-        editStockPref(context, symbol, false);
     }
 
     public static String getDisplayMode(Context context) {
